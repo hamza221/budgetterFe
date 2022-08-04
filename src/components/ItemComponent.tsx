@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useDrag } from "react-dnd";
 import Modal from "react-modal";
 import { v4 as uuid } from "uuid";
 import { CategoryContext } from "../pages/budgetting";
@@ -7,13 +8,35 @@ Modal.setAppElement("#root");
 
 export default function ItemComponent(props: any) {
   const [modalIsOpen, setIsOpen] = useState(false);
+
+  const [data, setData] = useState(props.data);
+  const [{ opacity }, dragRef] = useDrag(
+    () => ({
+      type: "item",
+      item: { data },
+      collect: (monitor) => ({
+        opacity: monitor.isDragging() ? 1 : 1,
+      }),
+    }),
+    []
+  );
   const openModal = () => {
     setIsOpen(true);
   };
   const closeModal = () => {
     setIsOpen(false);
   };
-
+  const handleModalSubmit = (event) => {
+    event.preventDefault();
+    console.log(event.target.value);
+    closeModal();
+  };
+  const handleChange = (event) => {
+    const name = event.target.name;
+    const value = event.target.value;
+    setData({ ...data, [name]: value });
+    console.log(data);
+  };
   const customStyles = {
     content: {
       top: "30%",
@@ -33,23 +56,19 @@ export default function ItemComponent(props: any) {
           style={customStyles}
           contentLabel="Modal"
         >
-          <CategoryContext.Consumer>
-            {(categories) => {
-              return (
-                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                  {categories}
-                </h5>
-              );
-            }}
-          </CategoryContext.Consumer>
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {props.data.title}
+          </h5>
 
-          <form className="w-full max-w-sm">
+          <form onSubmit={handleModalSubmit} className="w-full max-w-sm">
             <div className="flex justify-between mt-6">
               <label className="mr-5">Amount </label>
               <input
+                name="amount"
                 className="  appearance-none bg-transparent w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
                 type="text"
                 placeholder={props.data.amount}
+                onChange={handleChange}
                 aria-label="Price"
               />
             </div>
@@ -59,7 +78,12 @@ export default function ItemComponent(props: any) {
                 <CategoryContext.Consumer>
                   {(categories) => {
                     return (
-                      <select className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
+                      <select
+                        name="category"
+                        value={props.data.category}
+                        onChange={handleChange}
+                        className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+                      >
                         {categories.map((category: string) => {
                           return <option key={uuid()}>{category}</option>;
                         })}
@@ -83,6 +107,8 @@ export default function ItemComponent(props: any) {
               <input
                 className=" appearance-none bg-transparent w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
                 type="text"
+                name="description"
+                onChange={handleChange}
                 placeholder={props.data.description}
                 aria-label="Price"
               />
@@ -90,7 +116,7 @@ export default function ItemComponent(props: any) {
             <div className="w-full flex justify-end mt-6">
               <button
                 className="border  border-primary rounded w-1/4 py-1 px-2 flex-shrink-0"
-                onClick={closeModal}
+                type="submit"
               >
                 Save
               </button>
@@ -104,6 +130,8 @@ export default function ItemComponent(props: any) {
           </form>
         </Modal>
         <button
+          style={{ opacity }}
+          ref={dragRef}
           onClick={openModal}
           className="text-left mt-4 block p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
         >

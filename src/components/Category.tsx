@@ -1,10 +1,33 @@
+import { useContext } from "react";
+import { useDrop } from "react-dnd";
 import { v4 as uuid } from "uuid";
 import { ItemContext } from "../pages/budgetting";
 import ItemComponent from "./ItemComponent";
 
 export default function CategoryComponent(props) {
+  const { items, setItems } = useContext(ItemContext);
+
+  const [{ isOver }, drop] = useDrop(
+    () => ({
+      accept: "item",
+      drop: (item: any) => {
+        items[
+          items.findIndex((itemm) => {
+            return itemm.id == item.data.id;
+          })
+        ].category = props.category;
+
+        const tmp = [...items];
+        setItems(tmp);
+      },
+      collect: (monitor) => ({
+        isOver: monitor.isOver,
+      }),
+    }),
+    []
+  );
   return (
-    <div className="h-full min-w-1/4 hover:overflow-y-scroll mr-7 ">
+    <div className="h-full min-w-1/4 hover:overflow-y-scroll mr-7 " ref={drop}>
       <>
         <div className="flex justify-between">
           <h1 className="font-semibold font-mono text-left">
@@ -27,15 +50,11 @@ export default function CategoryComponent(props) {
         </div>
       </>
       <div>
-        <ItemContext.Consumer>
-          {(items) =>
-            items
-              .filter((item) => item.category == props.category)
-              .map((item) => {
-                return <ItemComponent key={uuid()} data={item}></ItemComponent>;
-              })
-          }
-        </ItemContext.Consumer>
+        {items
+          .filter((item) => item.category == props.category)
+          .map((item) => {
+            return <ItemComponent key={uuid()} data={item}></ItemComponent>;
+          })}
       </div>
     </div>
   );
