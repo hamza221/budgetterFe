@@ -1,27 +1,15 @@
-import React, { useState } from "react";
-import Item from "../types/item";
+import { v4 as uuid } from "uuid";
+import { ItemContext } from "../pages/budgetting";
 import ItemComponent from "./ItemComponent";
 
-export default function Category(props) {
-    const [categories,setCategories] = useState(["Food",
-    "Transport",
-    "Entertainment",
-    "Other",])
-  const [items, setItems] = useState<Item[]>([
-
-    {
-      title: "Test",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, qui?",
-      category: "Food",
-      amount: 50,
-    },
-  ]);
+export default function CategoryComponent(props) {
   return (
     <div className="h-full min-w-1/4 hover:overflow-y-scroll mr-7 ">
       <>
         <div className="flex justify-between">
-          <h1 className="font-semibold font-mono text-left">{props.title}</h1>
+          <h1 className="font-semibold font-mono text-left">
+            {props.category}
+          </h1>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-4 w-4 self-center cursor-pointer"
@@ -39,11 +27,15 @@ export default function Category(props) {
         </div>
       </>
       <div>
-        {items.map((item) => {
-          return (
-            <ItemComponent item={item} categories={categories}></ItemComponent>
-          );
-        })}
+        <ItemContext.Consumer>
+          {(items) =>
+            items
+              .filter((item) => item.category == props.category)
+              .map((item) => {
+                return <ItemComponent key={uuid()} data={item}></ItemComponent>;
+              })
+          }
+        </ItemContext.Consumer>
       </div>
     </div>
   );
