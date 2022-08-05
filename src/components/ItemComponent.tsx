@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDrag } from "react-dnd";
 import Modal from "react-modal";
+import { io } from "socket.io-client";
 import { v4 as uuid } from "uuid";
 import { CategoryContext } from "../pages/budgetting";
 
@@ -133,7 +134,7 @@ export default function ItemComponent(props: any) {
           style={{ opacity }}
           ref={dragRef}
           onClick={openModal}
-          className="text-left mt-4 block p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
+          className="text-left min-w-full mt-4 block p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
         >
           <div className="flex justify-between">
             <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">

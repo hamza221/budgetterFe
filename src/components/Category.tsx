@@ -1,24 +1,24 @@
+import axios from "axios";
 import { useContext } from "react";
 import { useDrop } from "react-dnd";
+import { io } from "socket.io-client";
 import { v4 as uuid } from "uuid";
 import { ItemContext } from "../pages/budgetting";
+import Item from "../types/item";
 import ItemComponent from "./ItemComponent";
+const baseUrl = "http://localhost:3000/";
 
 export default function CategoryComponent(props) {
+  const socket = io("http://localhost:80/");
+
   const { items, setItems } = useContext(ItemContext);
 
   const [{ isOver }, drop] = useDrop(
     () => ({
       accept: "item",
       drop: (item: any) => {
-        items[
-          items.findIndex((itemm) => {
-            return itemm.id == item.data.id;
-          })
-        ].category = props.category;
-
-        const tmp = [...items];
-        setItems(tmp);
+        updateItem(item.data);
+        socket.emit("drop", "chay");
       },
       collect: (monitor) => ({
         isOver: monitor.isOver,
@@ -26,6 +26,19 @@ export default function CategoryComponent(props) {
     }),
     []
   );
+  function updateItem(item: Item) {
+    console.log(item);
+    axios
+      .patch(`${baseUrl}items/${item.$id}`, {
+        title: item.title,
+        description: item.description,
+        amount: item.amount,
+        category: props.category,
+      })
+      .then((response) => {
+        console.log(response);
+      });
+  }
   return (
     <div className="h-full min-w-1/4 hover:overflow-y-scroll mr-7 " ref={drop}>
       <>

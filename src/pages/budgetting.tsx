@@ -1,4 +1,6 @@
-import React, { createContext, useMemo, useState } from "react";
+import axios from "axios";
+import React, { createContext, useEffect, useMemo, useState } from "react";
+import { io } from "socket.io-client";
 import Aside from "../components/Aside";
 import Button from "../components/Button";
 import Categories from "../components/Categories";
@@ -9,40 +11,45 @@ import MainContainer from "../components/MainContainer";
 import Nav from "../components/Nav";
 import Item from "../types/item";
 
+const baseUrl = "http://localhost:3000/";
 export const CategoryContext = createContext<string[]>([]);
 export const ItemContext = createContext({
   items: [
     {
-      id: 1,
-      title: "Test",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, qui?",
-      category: "Entertainment",
-      amount: 50,
-    } as Item,
+      $id: 2,
+      title: "Penny",
+      description: "Penny",
+      amount: 20,
+      category: "Food",
+    },
   ],
   setItems: () => {},
 });
 
 export default function () {
+  const socket = io("http://localhost:80/");
+
   const [items, setItems] = useState<Item[]>([
     {
-      id: 1,
-      title: "Test",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, qui?",
+      $id: 2,
+      title: "test",
+      description: "Penny",
+      amount: 20,
       category: "Food",
-      amount: 50,
-    },
-    {
-      id: 2,
-      title: "Test",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Vero, qui?",
-      category: "Transport",
-      amount: 150,
     },
   ]);
+  useEffect(() => {
+    axios.get(baseUrl + "items").then((response) => {
+      setItems(response.data);
+    });
+  }, []);
+  socket.on("dropped", (tmp) => {
+    console.log("asba");
+    axios.get(baseUrl + "items").then((response) => {
+      setItems(response.data);
+    });
+    console.log(tmp);
+  });
   const value = useMemo(() => ({ items, setItems }), [items]);
   const [categories, setCategories] = useState([
     "Food",
